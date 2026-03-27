@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define CLASSES 3
+#define STUDENTS 5
+#define SUBJECTS 3
+
+typedef struct {
+    char name[50];
+    int marks[SUBJECTS];
+    float total, average;
+    char grade;
+} Student;
+
+char findGrade(float avg) {
+    if (avg >= 90) return 'A';
+    else if (avg >= 80) return 'B';
+    else if (avg >= 70) return 'C';
+    else if (avg >= 60) return 'D';
+    else return 'F';
+}
+
+int main() {
+
+    Student s[CLASSES][STUDENTS];
+    char className[CLASSES] = {'A','B','C'};
+    char subjectNames[SUBJECTS][20] = {"Maths","Science","English"};
+
+    float classAvg[CLASSES] = {0};
+    float subjectTotal[SUBJECTS] = {0};
+
+    int classFails[CLASSES] = {0};
+
+    float bestClassAvg = 0;
+    float highestSubjectAvg = 0;
+
+    int bestClass = 0;
+    int mostFails = 0;
+    int mostFailsClass = 0;
+    int bestSubject = 0;
+
+    for(int c=0;c<CLASSES;c++)
+    {
+        printf("\nEnter marks for Class %c\n",className[c]);
+
+        for(int i=0;i<STUDENTS;i++)
+        {
+            printf("\nEnter name for Student %d : ",i+1);
+            scanf("%s",s[c][i].name);
+
+            s[c][i].total = 0;
+
+            for(int j=0;j<SUBJECTS;j++)
+            {
+                printf("Enter marks in %s : ",subjectNames[j]);
+                scanf("%d",&s[c][i].marks[j]);
+
+                s[c][i].total += s[c][i].marks[j];
+                subjectTotal[j] += s[c][i].marks[j];
+            }
+
+            s[c][i].average = s[c][i].total / SUBJECTS;
+            s[c][i].grade = findGrade(s[c][i].average);
+
+            classAvg[c] += s[c][i].average;
+
+            if(s[c][i].grade == 'F')
+            {
+                classFails[c]++;
+            }
+        }
+
+        classAvg[c] = classAvg[c] / STUDENTS;
+
+        if(classAvg[c] > bestClassAvg)
+        {
+            bestClassAvg = classAvg[c];
+            bestClass = c;
+        }
+
+        if(classFails[c] > mostFails)
+        {
+            mostFails = classFails[c];
+            mostFailsClass = c;
+        }
+    }
+
+    printf("\nCLASS RANK LISTS (By Average)\n\n");
+
+    for(int c=0;c<CLASSES;c++)
+    {
+        printf("Class %c\n",className[c]);
+        printf("Rank   Name           Average   Grade\n");
+        printf("--------------------------------------\n");
+
+        for(int r=0;r<STUDENTS;r++)
+        {
+            for(int k=r+1;k<STUDENTS;k++)
+            {
+                if(s[c][k].average > s[c][r].average)
+                {
+                    Student temp = s[c][r];
+                    s[c][r] = s[c][k];
+                    s[c][k] = temp;
+                }
+            }
+        }
+
+        for(int r=0;r<STUDENTS;r++)
+        {
+            printf("%-6d %-13s %-8.2f %c\n",r+1,s[c][r].name,s[c][r].average,s[c][r].grade);
+        }
+
+        printf("Class Avg : %.2f\n",classAvg[c]);
+        printf("Fails     : %d\n\n",classFails[c]);
+    }
+
+    printf("\nSUBJECT SUMMARY\n");
+    printf("-----------------------------\n");
+
+    for(int j=0;j<SUBJECTS;j++)
+    {
+        float avg = subjectTotal[j] / (CLASSES * STUDENTS);
+
+        printf("%-10s Average : %.2f\n",subjectNames[j],avg);
+
+        if(avg > highestSubjectAvg)
+        {
+            highestSubjectAvg = avg;
+            bestSubject = j;
+        }
+    }
+
+    printf("\nBest Subject : %s\n",subjectNames[bestSubject]);
+    printf("Best Class   : Class %c (Avg %.2f)\n",className[bestClass],bestClassAvg);
+    printf("Most Fails   : Class %c (Fails %d)\n",className[mostFailsClass],mostFails);
+
+    return 0;
+}
